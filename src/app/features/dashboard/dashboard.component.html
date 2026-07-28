@@ -18,7 +18,22 @@
           type="search"
           placeholder="Search products..."
           aria-label="Search products"
-        /><button class="refresh" type="button" (click)="refresh()">Refresh</button>
+        />
+        <select [formControl]="categoryControl" aria-label="Filter products by category">
+          <option value="">All categories</option>
+          @for (category of categories(); track category.slug) {
+            <option [value]="category.slug">{{ category.name }}</option>
+          }
+        </select>
+        <button
+          class="refresh"
+          type="button"
+          (click)="clearFilters()"
+          [disabled]="!searchControl.value && !categoryControl.value"
+        >
+          Clear
+        </button>
+        <button class="refresh" type="button" (click)="refresh()">Refresh</button>
       </div>
       @if (isLoading()) {
         <div class="state">
@@ -33,7 +48,7 @@
       } @else if (!products().length) {
         <div class="state">
           <p>No products found.</p>
-          <small>Try a different search term or add a product.</small>
+          <small>Try a different search term or category, or add a product.</small>
         </div>
       } @else {
         <div class="table-wrap">

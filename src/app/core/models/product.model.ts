@@ -15,6 +15,11 @@ export interface ProductResponse {
   limit: number;
 }
 
+export interface ProductCategory {
+  slug: string;
+  name: string;
+}
+
 export type ProductPayload = Pick<
   Product,
   'title' | 'description' | 'price' | 'category' | 'stock'

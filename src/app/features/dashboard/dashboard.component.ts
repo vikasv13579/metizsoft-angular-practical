@@ -3,8 +3,17 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { catchError, debounceTime, distinctUntilChanged, finalize, of, switchMap } from 'rxjs';
-import { Product, ProductPayload } from '../../core/models/product.model';
+import {
+  catchError,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  finalize,
+  of,
+  startWith,
+  switchMap,
+} from 'rxjs';
+import { Product, ProductCategory, ProductPayload } from '../../core/models/product.model';
 import { AuthService } from '../../core/services/auth.service';
 import { ProductService } from '../../core/services/product.service';
 import { ToastComponent } from '../../shared/components/toast/toast.component';
@@ -26,6 +35,7 @@ export class DashboardComponent {
   private readonly locallyCreatedProductIds = new Set<number>();
 
   readonly searchControl = this.fb.nonNullable.control('');
+  readonly categoryControl = this.fb.nonNullable.control('');
   readonly productForm = this.fb.nonNullable.group({
     title: ['', Validators.required],
     description: ['', Validators.required],
@@ -34,6 +44,7 @@ export class DashboardComponent {
     stock: [0, [Validators.required, Validators.min(0)]],
   });
   readonly products = signal<Product[]>([]);
+  readonly categories = signal<ProductCategory[]>([]);
   readonly isLoading = signal(false);
   readonly error = signal('');
   editingProduct: Product | null = null;
@@ -43,15 +54,23 @@ export class DashboardComponent {
   isDeleting = false;
 
   constructor() {
-    this.loadProducts();
-    this.searchControl.valueChanges
-      .pipe(
+    this.loadCategories();
+    combineLatest([
+      this.searchControl.valueChanges.pipe(
+        startWith(this.searchControl.value),
         debounceTime(350),
         distinctUntilChanged(),
-        switchMap((term) => {
+      ),
+      this.categoryControl.valueChanges.pipe(
+        startWith(this.categoryControl.value),
+        distinctUntilChanged(),
+      ),
+    ])
+      .pipe(
+        switchMap(([term, category]) => {
           this.isLoading.set(true);
           this.error.set('');
-          return this.productsApi.getProducts(term).pipe(
+          return this.productsApi.getProducts(term, category).pipe(
             catchError(() => {
               this.isLoading.set(false);
               this.error.set('Products could not be loaded. Please try again.');
@@ -62,7 +81,7 @@ export class DashboardComponent {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((response) => {
-        this.products.set(response?.products ?? []);
+        this.products.set(this.filterBySearch(response?.products ?? [], this.searchControl.value));
         this.isLoading.set(false);
       });
   }
@@ -70,12 +89,16 @@ export class DashboardComponent {
   refresh(): void {
     this.loadProducts();
   }
+  clearFilters(): void {
+    this.searchControl.setValue('');
+    this.categoryControl.setValue('');
+  }
   loadProducts(): void {
     this.isLoading.set(true);
     this.error.set('');
-    this.productsApi.getProducts(this.searchControl.value).subscribe({
+    this.productsApi.getProducts(this.searchControl.value, this.categoryControl.value).subscribe({
       next: (response) => {
-        this.products.set(response.products);
+        this.products.set(this.filterBySearch(response.products, this.searchControl.value));
         this.isLoading.set(false);
       },
       error: () => {
@@ -172,6 +195,25 @@ export class DashboardComponent {
     void this.router.navigate(['/login']);
   }
   trackById = (_: number, product: Product) => product.id;
+
+  private loadCategories(): void {
+    this.productsApi.getCategories().subscribe({
+      next: (categories) => this.categories.set(categories),
+      error: () => this.categories.set([]),
+    });
+  }
+
+  private filterBySearch(products: Product[], search: string): Product[] {
+    // DummyJSON exposes separate search and category endpoints. When both controls
+    // are active, category results are narrowed by the current search phrase.
+    if (!this.categoryControl.value || !search.trim()) return products;
+    const term = search.trim().toLocaleLowerCase();
+    return products.filter(
+      (product) =>
+        product.title.toLocaleLowerCase().includes(term) ||
+        product.description.toLocaleLowerCase().includes(term),
+    );
+  }
 
   private addProductToList(product: Product): void {
     const productId = this.products().some((item) => item.id === product.id)
