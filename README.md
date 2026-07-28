@@ -63,13 +63,13 @@ Open `/dashboard` without signing in. The guard redirects to `/login` and preser
 
 Submit the login form with required fields empty. The form shows validation messages before an API request can be made.
 
-![Required login field validation](./screenshots/login-validation-empty.png)
+![Required login field validation](./screenshots/wrong-validation.png)
 
 #### 1.3 Invalid credentials show an error notification
 
 Enter an invalid username or password and submit. The failed authentication attempt displays a toast notification.
 
-![Invalid login credentials and toast feedback](./screenshots/login-validation-wrong-username%20-password.png)
+![Invalid login credentials and toast feedback](./screenshots/wrong-validation.png)
 
 #### 1.4 Loading state during authentication
 
@@ -135,7 +135,7 @@ Choose a category from the filter dropdown. Products are fetched through the mat
 
 In browser DevTools, inspect a product API request after login. The HTTP interceptor automatically adds `Authorization: Bearer <token>` to authenticated requests.
 
-![Authorization header added by the interceptor](./screenshots/pass-token-in-header-throgh-intercepter.png)
+![Authorization header added by the interceptor](./screenshots/token-pass-header-throgh-interceptor.png)
 
 ### 4. UI and error feedback
 
