@@ -37,8 +37,10 @@ export class AuthService {
       firstName: 'Metizsoft',
       lastName: 'Admin',
       email: 'admin@metizsoft.com',
-      accessToken: 'local-demo-access-token',
-      refreshToken: 'local-demo-refresh-token',
+      // This local demo has no authentication server, so issue fresh opaque
+      // tokens for each successful sign-in instead of using fixed values.
+      accessToken: this.createDemoToken('access'),
+      refreshToken: this.createDemoToken('refresh'),
     };
     this.persistSession(response);
     return of(response).pipe(delay(350));
@@ -83,5 +85,11 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  private createDemoToken(kind: 'access' | 'refresh'): string {
+    const id = globalThis.crypto?.randomUUID?.();
+    const entropy = id ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    return `demo-${kind}-${entropy}`;
   }
 }
