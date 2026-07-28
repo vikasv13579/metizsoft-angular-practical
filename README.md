@@ -4,7 +4,7 @@ A standalone Angular 22 admin portal demonstrating authentication, protected rou
 
 ## Live demo
 
-[Open the deployed Secure Admin Portal](https://metizsoft-angular-practical.vercel.app/)
+[Open the deployed Secure Admin Portal](https://metizsoft-angular-practical.vercel.app/) or  https://metizsoft-angular-practical.vercel.app/
 
 Demo credentials:
 
