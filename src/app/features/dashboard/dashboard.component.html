@@ -1,0 +1,135 @@
+<div class="shell">
+  <header>
+    <div class="identity"><b>AP</b><span>Admin Portal</span></div>
+    <button class="logout" type="button" (click)="logout()">Log out</button>
+  </header>
+  <main>
+    <div class="page-heading">
+      <div>
+        <h1>Products</h1>
+        <p>Manage the product catalogue.</p>
+      </div>
+      <button class="primary" type="button" (click)="openAdd()">Add product</button>
+    </div>
+    <section class="content-card">
+      <div class="toolbar">
+        <input
+          [formControl]="searchControl"
+          type="search"
+          placeholder="Search products..."
+          aria-label="Search products"
+        /><button class="refresh" type="button" (click)="refresh()">Refresh</button>
+      </div>
+      @if (isLoading()) {
+        <div class="state">
+          <span class="loader"></span>
+          <p>Loading products...</p>
+        </div>
+      } @else if (error()) {
+        <div class="state error-state">
+          <p>{{ error() }}</p>
+          <button type="button" (click)="loadProducts()">Try again</button>
+        </div>
+      } @else if (!products().length) {
+        <div class="state">
+          <p>No products found.</p>
+          <small>Try a different search term or add a product.</small>
+        </div>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th class="actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of products(); track trackById($index, product)) {
+                <tr>
+                  <td>
+                    <div class="product">
+                      <div>
+                        <strong>{{ product.title }}</strong
+                        ><small>{{ product.description }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="tag">{{ product.category }}</span>
+                  </td>
+                  <td>{{ product.price | currency: 'USD' }}</td>
+                  <td>{{ product.stock }}</td>
+                  <td class="actions">
+                    <button type="button" (click)="openEdit(product)">Edit</button
+                    ><button class="delete" type="button" (click)="requestDelete(product)">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </main>
+</div>
+@if (isModalOpen) {
+  <div class="backdrop" (click)="closeModal()">
+    <section class="modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h2>{{ editingProduct ? 'Edit product' : 'Add product' }}</h2>
+        <button type="button" (click)="closeModal()" aria-label="Close">×</button>
+      </div>
+      <form [formGroup]="productForm" (ngSubmit)="save()">
+        <label>Product name<input formControlName="title" /></label>
+        @if (productForm.controls.title.touched && productForm.controls.title.invalid) {
+          <small class="invalid">Product name is required.</small>
+        }
+        <label>Description<textarea formControlName="description" rows="3"></textarea></label>
+        <div class="form-grid">
+          <label>Price<input formControlName="price" type="number" min="0" /></label
+          ><label>Stock<input formControlName="stock" type="number" min="0" /></label>
+        </div>
+        <label>Category<input formControlName="category" /></label>
+        <div class="modal-actions">
+          <button type="button" (click)="closeModal()">Cancel</button
+          ><button class="primary" type="submit" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : 'Save product' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+@if (pendingDelete) {
+  <div class="backdrop" (click)="cancelDelete()">
+    <section
+      class="modal confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-head">
+        <h2 id="delete-title">Delete product</h2>
+        <button type="button" (click)="cancelDelete()" aria-label="Close">×</button>
+      </div>
+      <p>
+        Are you sure you want to delete <strong>{{ pendingDelete.title }}</strong
+        >? This action cannot be undone in this session.
+      </p>
+      <div class="modal-actions">
+        <button type="button" (click)="cancelDelete()" [disabled]="isDeleting">Cancel</button
+        ><button class="danger" type="button" (click)="confirmDelete()" [disabled]="isDeleting">
+          {{ isDeleting ? 'Deleting...' : 'Delete product' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}
+<app-toast />

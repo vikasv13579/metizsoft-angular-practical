@@ -1,0 +1,39 @@
+<main class="login-page">
+  <section class="login-card" aria-labelledby="login-title">
+    <div class="brand">
+      <span>AP</span>
+      <div><strong>Admin Portal</strong><small>Secure workspace</small></div>
+    </div>
+    <h1 id="login-title">Sign in</h1>
+    <p class="intro">Enter your credentials to continue to the dashboard.</p>
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <label for="username">Username</label>
+      <input id="username" type="text" formControlName="username" autocomplete="username" />
+      @if (form.controls.username.touched && form.controls.username.hasError('required')) {
+        <p class="field-error">Username is required.</p>
+      }
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        autocomplete="current-password"
+      />
+      @if (form.controls.password.touched && form.controls.password.hasError('required')) {
+        <p class="field-error">Password is required.</p>
+      }
+      @if (form.controls.password.touched && form.controls.password.hasError('minlength')) {
+        <p class="field-error">Password must be at least 6 characters.</p>
+      }
+      <button type="submit" [disabled]="isSubmitting()">
+        @if (isSubmitting()) {
+          <span class="spinner"></span> Signing in...
+        } @else {
+          Sign in
+        }
+      </button>
+    </form>
+    <p class="hint">Demo account: <code>Metizsoft@tech</code> / <code>Admin@123</code></p>
+  </section>
+</main>
+<app-toast />

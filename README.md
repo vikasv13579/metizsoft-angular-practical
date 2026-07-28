@@ -1,59 +1,39 @@
-# MetizsoftAngularPractical
+# Secure Admin Portal
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.8.
+A standalone Angular 22 admin portal demonstrating authentication, protected routing, API-backed product management, and RxJS search.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- Reactive-form login with validation, loading state, and feedback notifications
+- DummyJSON authentication with persisted token and user session
+- Functional auth guard and HTTP bearer-token interceptor with 401 handling
+- Lazy-loaded login and dashboard routes
+- Product list, create, edit, delete, refresh, and API-backed debounced search
+- Responsive enterprise-style table with loading, empty, and error states
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Run locally
 
 ```bash
-ng generate component component-name
+npm install
+npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Open `http://localhost:4200`.
 
-```bash
-ng generate --help
+Demo credentials: `Metizsoft@tech` / `Admin@123`.
+
+## Structure
+
+```
+src/app/
+  core/          models, auth/product services, guard, interceptor
+  shared/        notification service and toast component
+  features/auth/ lazy-loaded login feature
+  features/dashboard/ lazy-loaded secured product dashboard
 ```
 
-## Building
+## Architecture
 
-To build the project run:
+`AuthService` calls DummyJSON login and stores the JWT and minimal user profile in localStorage. `authGuard` blocks dashboard navigation when no token exists. `authInterceptor` attaches the bearer token to authenticated calls and clears the session after a 401 response.
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The dashboard uses DummyJSON Products. Product mutations call the corresponding endpoint and refresh the list afterwards. Search uses a reactive form control with `debounceTime`, `distinctUntilChanged`, and `switchMap`, invoking DummyJSON's `/products/search` endpoint rather than filtering locally.
