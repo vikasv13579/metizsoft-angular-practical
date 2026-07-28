@@ -4,7 +4,7 @@ A standalone Angular 22 admin portal demonstrating authentication, protected rou
 
 ## Live demo
 
-[Open the deployed Secure Admin Portal](https://metizsoft-angular-practical.vercel.app/) or  https://metizsoft-angular-practical.vercel.app/
+[Open the deployed Secure Admin Portal](https://metizsoft-angular-practical.vercel.app/) or https://metizsoft-angular-practical.vercel.app/
 
 Demo credentials:
 
@@ -57,7 +57,7 @@ Each screenshot below maps to a requirement in the assignment. To verify the por
 
 Open `/dashboard` without signing in. The guard redirects to `/login` and preserves the intended dashboard URL as `returnUrl`.
 
-![Auth Guard redirect to login](./screenshots/01-auth-guard.png.png)
+![Auth Guard redirect to login](./screenshots/login-dashabord-auth.png)
 
 #### 1.2 Reactive Form validation
 
