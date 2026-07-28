@@ -21,8 +21,8 @@ export class LoginComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly notifications = inject(NotificationService);
   readonly form = this.fb.nonNullable.group({
-    username: ['Metizsoft@tech', Validators.required],
-    password: ['Admin@123', [Validators.required, Validators.minLength(6)]],
+    username: ['emilys', Validators.required],
+    password: ['emilyspass', [Validators.required, Validators.minLength(6)]],
   });
   readonly isSubmitting = signal(false);
 

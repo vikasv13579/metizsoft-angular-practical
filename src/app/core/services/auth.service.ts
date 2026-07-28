@@ -1,16 +1,16 @@
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Observable, ReplaySubject, delay, of, throwError } from 'rxjs';
+import { Observable, ReplaySubject, tap } from 'rxjs';
 import { AuthUser, LoginResponse } from '../models/auth.model';
 
 const TOKEN_KEY = 'admin_portal_token';
 const USER_KEY = 'admin_portal_user';
-const DEMO_USERNAME = 'Metizsoft@tech';
-const DEMO_PASSWORD = 'Admin@123';
+const AUTH_URL = 'https://dummyjson.com/auth/login';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly http = inject(HttpClient);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly userSubject = new ReplaySubject<AuthUser | null>(1);
   readonly user$ = this.userSubject.asObservable();
@@ -20,30 +20,9 @@ export class AuthService {
   }
 
   login(username: string, password: string): Observable<LoginResponse> {
-    if (username !== DEMO_USERNAME || password !== DEMO_PASSWORD) {
-      return throwError(
-        () =>
-          new HttpErrorResponse({
-            status: 401,
-            statusText: 'Unauthorized',
-            error: { message: 'Invalid username or password.' },
-          }),
-      );
-    }
-
-    const response: LoginResponse = {
-      id: 1,
-      username: DEMO_USERNAME,
-      firstName: 'Metizsoft',
-      lastName: 'Admin',
-      email: 'admin@metizsoft.com',
-      // This local demo has no authentication server, so issue fresh opaque
-      // tokens for each successful sign-in instead of using fixed values.
-      accessToken: this.createDemoToken('access'),
-      refreshToken: this.createDemoToken('refresh'),
-    };
-    this.persistSession(response);
-    return of(response).pipe(delay(350));
+    return this.http
+      .post<LoginResponse>(AUTH_URL, { username, password, expiresInMins: 60 })
+      .pipe(tap((response) => this.persistSession(response)));
   }
 
   logout(): void {
@@ -85,11 +64,5 @@ export class AuthService {
     } catch {
       return null;
     }
-  }
-
-  private createDemoToken(kind: 'access' | 'refresh'): string {
-    const id = globalThis.crypto?.randomUUID?.();
-    const entropy = id ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-    return `demo-${kind}-${entropy}`;
   }
 }

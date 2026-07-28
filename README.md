@@ -8,8 +8,8 @@ A standalone Angular 22 admin portal demonstrating authentication, protected rou
 
 Demo credentials:
 
-- Username: `Metizsoft@tech`
-- Password: `Admin@123`
+- Username: `emilys`
+- Password: `emilyspass`
 
 ## Features
 
@@ -41,7 +41,7 @@ src/app/
 
 ## Architecture
 
-`AuthService` validates the local demo credentials and creates fresh opaque access and refresh tokens for every successful login. The access token and minimal user profile are stored in localStorage. `authGuard` blocks dashboard navigation when no token exists and redirects visitors to `/login?returnUrl=%2Fdashboard`. `authInterceptor` attaches the stored access token as a bearer token to authenticated calls and clears the session after a 401 response.
+`AuthService` authenticates through DummyJSON's `/auth/login` endpoint. Its API-issued JWT access token and minimal user profile are stored in localStorage. `authGuard` blocks dashboard navigation when no token exists and redirects visitors to `/login?returnUrl=%2Fdashboard`. `authInterceptor` attaches the stored access token as a bearer token to authenticated calls and clears the session after a 401 response.
 
 The dashboard uses DummyJSON Products. Product mutations call the corresponding endpoint and refresh the list afterwards. Search uses a reactive form control with `debounceTime`, `distinctUntilChanged`, and `switchMap`, invoking DummyJSON's `/products/search` endpoint. Categories are loaded from `/products/categories`; changing the category uses the category API endpoint. The **Clear** button resets both controls.
 
